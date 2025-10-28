@@ -1,0 +1,16 @@
+{
+  "name": "contaminados",
+  "version": "1.0.0",
+  "description": "Juego ContaminaDOS - versión modular ES6",
+  "main": "js/main.js",
+  "type": "module",
+  "scripts": {
+    "dev": "npx serve .",
+    "start": "npx serve ."
+  },
+  "dependencies": {
+    "serve": "^14.2.5"
+  },
+  "author": "Karla Siles",
+  "license": "MIT"
+}

@@ -1,0 +1,49 @@
+/* ================================================
+   Estilos y animaciones de la PRESENTACIÓN INICIAL
+   ================================================ */
+
+#presentation {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  background: #000;
+  color: #00ffea;
+  z-index: 9999;
+  text-align: center;
+  font-family: 'Press Start 2P', monospace;
+}
+
+.presentation-text {
+  opacity: 0;
+  font-size: clamp(18px, 4vw, 40px);
+  letter-spacing: 2px;
+  white-space: nowrap;
+  text-shadow: 0 0 8px rgba(0, 255, 255, 0.4),
+               0 0 16px rgba(0, 255, 255, 0.2);
+}
+
+/* Animaciones del texto */
+@keyframes fadeInText {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeOutText {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-10px); }
+}
+
+/* Pausar animaciones del título durante la intro */
+body.intro-active .contamina,
+body.intro-active .dos {
+  animation-play-state: paused !important;
+  -webkit-animation-play-state: paused !important;
+}
+
+/* Ocultar el main mientras la intro corre */
+.main-container {
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+}

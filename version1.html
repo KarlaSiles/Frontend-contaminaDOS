@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>ContaminaDOS - Interfaz de Juego</title>
+    <style>
+        /* Estilos */
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; margin: 0; padding-top: 50px; }
+        .container { width: 100%; max-width: 500px; padding: 25px; background-color: white; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); text-align: center; }
+        h1 { color: #333; margin-bottom: 20px; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+        input[type="text"], input[type="password"] { padding: 12px; margin: 10px 0; width: 90%; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
+        .buttons { display: flex; justify-content: space-between; margin-top: 20px; }
+        button { padding: 12px 20px; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; flex-grow: 1; margin: 0 5px; transition: background-color 0.3s; }
+        #btn-search { background-color: #007bff; }
+        #btn-search:hover { background-color: #0056b3; }
+        #btn-create { background-color: #28a745; }
+        #btn-create:hover { background-color: #1e7e34; }
+        
+        /* Estilos de Lobby */
+        #lobby-view h2 { color: #007bff; margin-top: 0;}
+        #lobby-player-list { border: 1px solid #ccc; padding: 10px; border-radius: 5px; min-height: 100px; text-align: left; background-color: #fff;}
+        .player-item { padding: 5px 0; border-bottom: 1px dotted #ddd;}
+        .player-item:last-child { border-bottom: none;}
+        .owner { font-weight: bold; color: #28a745;}
+        .status-bar { padding: 10px; margin-bottom: 10px; background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 5px; font-size: 0.9em; }
+
+        /* Estilos de resultados/log */
+        #results { margin-top: 25px; padding: 15px; background-color: #e9ecef; border: 1px solid #ced4da; border-radius: 6px; text-align: left; max-height: 250px; overflow-y: auto; font-size: 14px; }
+        .game-item { 
+            display: flex; 
+            justify-content: space-between; /* Mantiene la información a la izquierda y el botón a la derecha */
+            align-items: center; 
+            padding: 8px 0; 
+            border-bottom: 1px dashed #ccc; 
+        }
+    
+        .game-info {
+            flex-grow: 1; 
+            min-width: 0; 
+            padding-right: 15px;
+        }
+        .game-status, .game-players {
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+        .btn-join-list {
+            background-color: #007bff !important; 
+            color: white !important;
+            padding: 8px 15px !important;
+            font-weight: bold !important;
+            border-radius: 4px !important;
+            cursor: pointer !important;
+            transition: background-color 0.3s;
+            flex-shrink: 0; /* Asegura que el botón no se encoja cuando el texto es largo */
+            margin: 0;
+        }
+        .btn-join-list:hover {
+            background-color: #0056b3 !important;
+        }
+        
+
+        .error { color: #dc3545; font-weight: bold; }
+        
+        /* --- ESTILOS DE JUEGO EN CURSO --- */
+        .score { font-size: 2.5em; font-weight: bold; margin: 15px 0;}
+        .score .exemplar { color: #28a745; } 
+        .score .enemy { color: #dc3545; }    
+        
+        #game-player-list { border: 1px solid #ced4da; padding: 10px; border-radius: 6px; min-height: 150px; text-align: left; background-color: #fff;}
+        .game-player-item { 
+            padding: 8px 0; border-bottom: 1px dotted #ddd; 
+            display: flex; justify-content: space-between;
+            cursor: default; 
+            align-items: center;
+        }
+        
+        /* Colores de roles y líder */
+        .color-leader { color: gold; font-weight: bold; text-shadow: 1px 1px 2px #000; } 
+        .color-enemy { color: #dc3545; font-weight: 500;}    
+        .color-exemplar { color: #28a745; font-weight: 500;} 
+        
+        /* Estilos de selección de grupo */
+        .selectable { cursor: pointer; transition: background-color 0.1s; }
+        .selectable:hover { background-color: #f0f8ff; }
+        .selected-for-group { background-color: #add8e6; font-weight: bold; border: 2px solid #007bff; padding: 6px 8px; margin: 2px 0; border-radius: 4px; }
+        
+        /* Estilos de controles de juego, los botones */
+        #game-controls { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px; background-color: #f9f9f9; }
+        #game-controls button { margin: 5px; flex-grow: 1; }
+        
+        /* Votos y acciones */
+        .vote-status { margin-left: 10px; font-style: italic; font-weight: bold; }
+        .vote-approved { color: #28a745; }
+        .vote-rejected { color: #dc3545; }
+        
+        /* VISTA DE VICTORIA */
+        #victory-message {
+            padding: 20px;
+            background-color: #ffc107;
+            color: #333;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-size: 1.5em;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        /* POPUP con est muestra errores*/
+        #popup-message {
+            position: fixed; top: 20px; right: 20px;
+            padding: 15px; background-color: #dc3545; color: white;
+            border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 1000; display: none; opacity: 0;
+            transition: opacity 0.5s;
+        }
+        
+    </style>
+</head>
+<body>
+    <!-- Contenedor Principal. Aqui están las diferentes vistar, para cada etapa del juego -->
+    <div class="container">
+        <!-- Vista Inicial: Buscar/Crear Partida -->
+        <div id="initial-view">
+            <h1>ContaminaDOS</h1>
+            <form id="gameActionForm">
+                <input type="text" id="playerName" required placeholder="Tu Nombre (3-20 chars)" minlength="3" maxlength="20"><br>
+                <input type="text" id="gameName" placeholder="Nombre de Partida (para buscar o crear)" minlength="3" maxlength="20"><br>
+                <input type="password" id="password" placeholder="Contraseña (opcional)" minlength="3" maxlength="20"><br>
+                
+                <div class="buttons">
+                    <button type="button" id="btn-search">Buscar Partidas</button>
+                    <button type="button" id="btn-create">Crear Partida</button> 
+                </div>
+            </form>
+            <h2>Resultados / Log</h2>
+            <div id="results">Usa el botón "Buscar Partidas" para comenzar.</div>
+        </div>
+        <!-- Vista de Lobby -->
+        <div id="lobby-view" style="display:none;">
+            <h1 id="lobby-title">Lobby de Partida: </h1>
+            <div class="status-bar">
+                Esperando jugadores... (Actualización automática cada 5s)
+            </div>
+            <h2>Jugadores Unidos (<span id="player-count">0</span>/<span id="player-max">10</span>)</h2>
+            <div id="lobby-player-list">
+            </div>
+            <button id="btn-start-game" disabled style="background-color: #3f51b5; margin-top: 20px;">Comenzar Partida (Mínimo 5)</button>
+        </div>
+        <!-- Vista de Juego en Curso -->
+        <div id="game-view" style="display:none;">
+            <h1>Partida en Curso</h1>
+            
+            <div id="victory-message" style="display:none;"></div>
+
+            <div class="status-bar" id="game-status-bar">
+                Década actual: <span id="current-decade">1</span>
+                | Fase: <span id="current-phase">Cargando...</span>
+                | Rol: <span id="active-player-role">Cargando...</span>
+            </div>
+            <!-- Marcador -->
+            <div class="score">
+                <span id="score-exemplar" class="exemplar">0</span> : <span id="score-enemy" class="enemy">0</span>
+            </div>
+            
+            <div id="game-controls">
+                <p id="controls-info" style="font-weight: bold;">Esperando acción...</p>
+                <div id="controls-buttons" class="buttons">
+                    </div>
+            </div>
+
+            <h2>Jugadores (<span id="game-player-count">0</span>)</h2>
+            <div id="game-player-list">
+                </div>
+        </div>
+    </div>
+    
+    <div id="popup-message"></div>
+
+    <script>
+        //API y Lógica de Juego
+        // =================================================================
+        // CONFIGURACIÓN Y ESTADO GLOBAL
+        // =================================================================
+
+        // Constantes
+        //Con la URL_Base se puede cambiar el servidor. Es la base para todas las llamadas API
+        const URL_BASE = "https://contaminados.akamai.meseguercr.com/api/games"; 
+        //Esto es cada cuanto se actualiza
+        const POLLING_RATE = 5000; // 5 segundos
+
+        // Elementos de la UI
+        //Aqui se hace referencia a los diferentes elementos del HTML
+        const initialView = document.getElementById('initial-view');
+        const lobbyView = document.getElementById('lobby-view');
+        const gameView = document.getElementById('game-view'); 
+        const resultsDiv = document.getElementById('results');
+        const btnStartGame = document.getElementById('btn-start-game');
+        const popupMessage = document.getElementById('popup-message'); 
+        const victoryMessage = document.getElementById('victory-message');
+        
+        // Campos de entrada para nombre de jugador y contraseña
+        const playerNameInput = document.getElementById('playerName');
+        const passwordInput = document.getElementById('password');
+
+        // Estado del Juego. Aqui están las variables globales que mantienen el estado
+        let currentGameId = null; //Id de la partida actual
+        let currentActivePlayer = null; // Nombre del jugador actual
+        let pollingInterval = null; //Referecia al intervalo de polling
+        let gameData = null; // Ultimos datos del juego obtenidos del API
+        
+        // Estado de la Ronda, con esto podemos diferenciar entre las decadasd
+        let currentRoundId = null;// ID de la ronda actual. Se obtiene de /games/{gameId}
+        let currentRoundData = null;//Ultimos datos de la ronda activa. Se obtiene de /rounds
+        let allRoundsData = []; // Todas las rondas obtenidas de /rounds, para calcular el marcador
+        let selectedGroup = []; //Array temporal para la selección de grupo por el líder.Se obtiene de la UI
+        
+        // =================================================================
+        //  UTILIDADES DE UI Y POPUP
+        // =================================================================
+
+        // Función para mostrar mensajes en el área de resultados/log. En la pantalla principal
+        const displayLog = (message, type = 'info', append = true) => {
+            const time = new Date().toLocaleTimeString();
+            const logElement = `<div class="log-message ${type}">[${time}] ${message}</div>`;
+            
+            if (append) {
+                resultsDiv.innerHTML = logElement + resultsDiv.innerHTML;
+            } else {
+                resultsDiv.innerHTML = logElement; 
+            }
+        };
+
+
+        // Función para mostrar un popup  en la esquina derecha
+        const showPopup = (message, duration = 4000) => {
+            popupMessage.textContent = message;
+            popupMessage.style.display = 'block';
+            
+            //Esto reinicia la animación
+            void popupMessage.offsetWidth; 
+            popupMessage.style.opacity = 1;
+            
+            setTimeout(() => {
+                popupMessage.style.opacity = 0;
+                setTimeout(() => {
+                    popupMessage.style.display = 'none';
+                }, 500); // Espera a que termine la transición
+            }, duration);
+        }
+
+        // Función para validar inputs de texto, nombnre de jugador, nombre de partida, contraseña que cumplan con los requisitos
+        const validateInputs = (value, min, max, name) => {
+            if (value.length < min || value.length > max) {
+                displayLog(`Validación: El campo '${name}' debe tener entre ${min} y ${max} caracteres.`, 'error');
+                return false;
+            }
+            return true;
+        }
+        
+        // =================================================================
+        //  FUNCIÓN UNIVERSAL DE API. Tambien incluye manejo de errores y mensajes
+        // =================================================================
+        async function llamarAPI(url, method, bodyData = null, customHeaders = {}) { 
+            const config = {
+                method: method,
+                headers: { 
+                    'Accept': 'application/json',
+                    //Si hay datos en el cuerpo o el método es POST, PUT o PATCH, se añade el Content-Type
+                    ...(bodyData || method === 'POST' || method === 'PUT' || method === 'PATCH' ? {'Content-Type': 'application/json'} : {}),
+                    ...customHeaders // Añade cualquier encabezado personalizado. en este caso el nombre del jugador y la contraseña
+                },
+            };
+
+            if (bodyData && method !== 'GET' && method !== 'HEAD') {
+                config.body = JSON.stringify(bodyData);
+            }
+            
+            if (method !== 'GET' && method !== 'HEAD') {
+                displayLog(`Petición: ${method} ${url}...`, 'info');
+            }
+
+            try {// Realiza la llamada al API
+                const response = await fetch(url, config);
+                
+                const xMsg = response.headers.get('X-msg'); //mensaje del servidor en el header
+                
+                if (response.ok) { // si el estado es 204 fue exitoso pero sin contenido
+                    const data = response.status !== 204 ? await response.json() : { data: "Operación Exitosa" };
+                    return { success: true, status: response.status, data: data };
+                } else { // si no fue exitoso
+                    let data = {};
+                    try {// intenta parsear el JSON de error
+                        data = await response.json();
+                    } catch (e) {}
+                    // Aqui se prioriza el mensaje del header X-msg, luego el msg o message del body, y si no hay nada, un mensaje genérico
+                    const errorMessage = xMsg || data.msg || data.message || `Error [${response.status}] desconocido de la API.`;
+                    // muestra el error en un popup
+                    showPopup(errorMessage);
+                    // y también en el log
+                    return { success: false, status: response.status, error: errorMessage };
+                }
+
+            } catch (error) {// Manejo de errores de red o excepciones
+                showPopup(`Error de red/conexión: ${error.message}`);
+                return { success: false, status: 0, error: `Error de red/conexión: ${error.message}` };
+            }
+        }
+        
+        // =================================================================
+        //  LÓGICA PARA OBTENER DATOS DE JUEGO Y RONDAS
+        // =================================================================
+
+        /**
+         * Llama al API de rondas para obtener todas las rondas, y luego usa gameData.currentRound
+         * para identificar la ronda actual.
+         * Ya que en /rounds el array no mantiene un orden específico, se busca por ID.
+         */
+        async function fetchAllRoundsData(gameId, playerName, password, fetchedGameData) {
+            const URL_ROUNDS = `${URL_BASE}/${gameId}/rounds`;//Aqui arma la URL para llamar a las rondas
+            const customHeaders = { 'player': playerName };
+            if (password) { customHeaders['password'] = password; }// Si hay contraseña, se añade al header
+
+
+            const result = await llamarAPI(URL_ROUNDS, 'GET', null, customHeaders);// Llama a la API
+            
+            if (result.success && result.data.data) {
+                allRoundsData = result.data.data; // Almacena todas las rondas
+                
+                let activeRound = null;// Ronda activa por defecto nula
+                
+                // Buscar la ronda por el ID de currentRound
+                const currentRoundIdFromGame = fetchedGameData.currentRound;
+
+                if (currentRoundIdFromGame) {// Si hay un ID de ronda actual en gameData, buscarla
+                    activeRound = allRoundsData.find(r => r.id === currentRoundIdFromGame);// Busca la ronda actual por ID
+                }
+
+                // Si no se encuentra (ej. al inicio del juego), se usa la última ronda del array como respaldo.
+                if (!activeRound && allRoundsData.length > 0) {
+                    
+                    activeRound = allRoundsData[allRoundsData.length - 1];
+                }
+                // Actualiza las variables globales de ronda actual
+                currentRoundId = activeRound ? activeRound.id : null;
+                currentRoundData = activeRound;
+                
+                return activeRound;
+            }
+
+            allRoundsData = [];
+            currentRoundId = null;
+            currentRoundData = null;
+            return null; 
+        }
+
+        /**
+         * Calcula el marcador del juego contando las rondas terminadas. El status pasa a ended, esto se ve con /rounds
+         * en el array global allRoundsData.
+         * 
+         */
+        function calculateScoreFromRounds() {
+            // Reinicia los contadores
+            let scoreExemplar = 0;
+            let scoreEnemy = 0;
+
+            if (allRoundsData && allRoundsData.length > 0) {
+                allRoundsData.forEach(round => {
+                    if (round.status === 'ended' ) {
+                        // El resultado debe ser 'citizens' para Ejemplares o 'enemies' para Contaminados
+                        if (round.result === 'citizens') { 
+                            scoreExemplar++;
+                        } else if (round.result === 'enemies') { 
+                            scoreEnemy++;
+                        }
+                    }
+                });
+            }
+            
+            return { // Retorna un objeto con ambos contadores
+                scoreExemplar: scoreExemplar, 
+                scoreEnemy: scoreEnemy 
+            };
+        }
+
+
+        /**
+         * Retorna el tamaño de grupo requerido para una década.
+         */
+        function getRequiredGroupSize(playerCount, decade) {
+            // Tabla de tamaños de grupo, segun la tabla que dio el profe 
+            const table = {
+                // [Década]: {5: size, 6: size, 7: size, ...}
+                // Entonces si estamos en la decada 1 y hay 6 jugadores, el tamaño es 2. 
+                1: { 5: 2, 6: 2, 7: 2, 8: 3, 9: 3, 10: 3 },
+                2: { 5: 3, 6: 3, 7: 3, 8: 4, 9: 4, 10: 4 },
+                3: { 5: 2, 6: 4, 7: 3, 8: 4, 9: 4, 10: 4 },
+                4: { 5: 3, 6: 3, 7: 4, 8: 5, 9: 5, 10: 5 },
+                5: { 5: 3, 6: 4, 7: 4, 8: 5, 9: 5, 10: 5 }
+            };
+
+            const d = Math.min(decade, 5); 
+
+            return table[d] ? table[d][playerCount] || 2 : 2; 
+        }
+        
+        // =================================================================
+        // LÓGICA DE NAVEGACIÓN Y POLLING
+        // =================================================================
+        /**
+         * Aquí lo que se va hacer es cambiar las vistas y hacer el polling para actualizar el lobby o el juego
+         */
+
+
+         //Cambia a la vista de lobby y comienza el polling
+        function goToLobby(gameId, activePlayerName) {
+            currentGameId = gameId;// ID de la partida actual
+            currentActivePlayer = activePlayerName;// Nombre del jugador actual
+
+            initialView.style.display = 'none';// Oculta la vista inicial
+            gameView.style.display = 'none'; // Oculta la vista de juego
+            lobbyView.style.display = 'block';// Muestra la vista de lobby
+
+            // Actualiza el título del lobby con el ID de la partida
+            document.getElementById('lobby-title').textContent = `Lobby de Partida: ${gameId.substring(0, 8)}...`;
+            // Limpia la lista de jugadores
+            if (pollingInterval) clearInterval(pollingInterval);
+            
+            updateLobby(); // Llama inmediatamente para cargar el lobby
+            pollingInterval = setInterval(updateLobby, POLLING_RATE);// Inicia el polling del lobby
+            displayLog(`Lobby iniciado. Polling cada ${POLLING_RATE/1000}s.`, 'success', false);// Muestra mensaje en el log
+        }
+        
+        //cambia a la vista de juego y comienza el polling de juego y ronda
+        function goToGame(gameId, activePlayerName, fetchedGameData) {
+            currentGameId = gameId;// ID de la partida actual
+            currentActivePlayer = activePlayerName;// Nombre del jugador actual
+            gameData = fetchedGameData; // Datos iniciales del juego
+
+            if (pollingInterval) clearInterval(pollingInterval); 
+
+            initialView.style.display = 'none';// Oculta la vista inicial
+            lobbyView.style.display = 'none';// Oculta la vista de lobby
+            gameView.style.display = 'block';// Muestra la vista de juego
+            
+            // Inicia el polling de estado de juego/ronda
+            updateGameStatus(); 
+            pollingInterval = setInterval(updateGameStatus, POLLING_RATE);
+            
+            displayLog(`Partida Iniciada. ¡A jugar! Polling de juego iniciado.`, 'success', false);
+        }
+        
+        /**
+         * Función de polling principal una vez que el juego comienza
+         * Aqui se obtiene el estodo del juego y de la ronda actual, y se renderiza la vista
+         */
+        async function updateGameStatus() {
+            if (!currentGameId) return;
+
+            const URL_GAME_INFO = `${URL_BASE}/${currentGameId}`;//llama a la api /games/{gameId}
+            const playerName = playerNameInput.value.trim();// Nombre del jugador actual
+            const password = passwordInput.value.trim();// Contraseña si existe
+            
+            const customHeaders = { 'player': playerName };
+            if (password) { customHeaders['password'] = password; }
+            
+            // 1. Obtener estado del juego(GET /games/{gameId})
+            const gameResult = await llamarAPI(URL_GAME_INFO, 'GET', null, customHeaders);
+            if (!gameResult.success) return;
+            
+            gameData = gameResult.data.data; 
+            
+            // 2. Obtener TODAS las rondas y la ronda actual (usando gameData.currentRound)
+            const roundData = await fetchAllRoundsData(currentGameId, playerName, password, gameData);
+            
+            const currentDecade = allRoundsData.length > 0 ? allRoundsData.length : 1; 
+            
+            // 3. Renderizar la vista
+            renderGameView(gameData, roundData, currentDecade);
+        }
+        
+        // =================================================================
+        //  LÓGICA DE JUEGO POR FASE (API CALLS)
+        // =================================================================
+
+        /**
+         * Envía la propuesta de grupo (PATCH /rounds/{roundId}). Solo el líder puede hacerlo.
+         */
+        async function proposeGroup() {
+            if (!currentRoundId || !currentRoundData || !gameData) return;
+            
+            const playerCount = gameData.players.length;// Número total de jugadores
+            const decade = allRoundsData.length || 1; // Década actual
+            const groupSize = getRequiredGroupSize(playerCount, decade);// Tamaño de grupo requerido. Aqui se va a la tabla de antes
+            
+            if (selectedGroup.length !== groupSize) {//Si el tamaño seleccionado no correcto, muestra error
+                showPopup(`Error: El grupo requiere exactamente ${groupSize} jugadores (Década ${decade}, ${playerCount} jugadores). Seleccionaste ${selectedGroup.length}.`);
+                return;
+            }
+
+            const URL_PROPOSE = `${URL_BASE}/${currentGameId}/rounds/${currentRoundId}`;// URL para proponer grupo (PATCH /rounds/{roundId})
+            const playerName = playerNameInput.value.trim();// Nombre del jugador actual
+            const password = passwordInput.value.trim();// Contraseña si existe
+            
+            const customHeaders = { 'player': playerName };
+            if (password) { customHeaders['password'] = password; }
+
+            const bodyData = { group: selectedGroup };// se envía el grupo seleccionado en el cuerpo
+
+            const result = await llamarAPI(URL_PROPOSE, 'PATCH', bodyData, customHeaders);// Llama a la API
+            
+            if (result.success) {// Si fue exitoso
+                showPopup('✅ Propuesta de grupo enviada con éxito.', 4000);
+                selectedGroup = []; 
+                setTimeout(() => { updateGameStatus(); }, 500); 
+            }
+        }
+        
+        /**
+         * Envía el voto de aprobación/rechazo (POST /rounds/{roundId}). Para todos los jugadores.
+         */
+        async function voteForGroup(vote) {
+            if (!currentRoundId || !currentRoundData) return;
+            
+            const URL_VOTE = `${URL_BASE}/${currentGameId}/rounds/${currentRoundId}`;// URL para votar (POST /rounds/{roundId})
+            const playerName = playerNameInput.value.trim();
+            const password = passwordInput.value.trim();
+            
+            const customHeaders = { 'player': playerName };
+            if (password) { customHeaders['password'] = password; }
+
+            const bodyData = { vote: vote }; // voto: true (aprobar) o false (rechazar)
+
+            const result = await llamarAPI(URL_VOTE, 'POST', bodyData, customHeaders);// Llama a la API
+            
+            if (result.success) {
+                showPopup(`✅ Voto emitido: ${vote ? 'Aprobado' : 'Rechazado'}.`, 4000);
+                // No se detiene el polling, solo se actualiza el estado para reflejar el voto.
+                updateGameStatus(); 
+            }
+        }
+
+        /**
+         * Envía la acción de colaborar/sabotear (PUT /rounds/{roundId}). Solo para miembros del grupo.
+         */
+        async function submitAction(action) {
+            if (!currentRoundId || !currentRoundData) return;
+            
+            const URL_ACTION = `${URL_BASE}/${currentGameId}/rounds/${currentRoundId}`;// URL para enviar acción (PUT /rounds/{roundId})
+            const playerName = playerNameInput.value.trim();
+            const password = passwordInput.value.trim();
+            
+            const customHeaders = { 'player': playerName };
+            if (password) { customHeaders['password'] = password; }
+
+            const bodyData = { action: action };// acción: true (colaborar) o false (sabotear)
+
+            const result = await llamarAPI(URL_ACTION, 'PUT', bodyData, customHeaders);// Llama a la API
+            
+            if (result.success) {
+                showPopup(`✅ Acción registrada: ${action ? 'Colaboración' : 'Sabotaje'}.`, 4000);
+                updateGameStatus(); 
+            }
+        }
+
+        // =================================================================
+        // LÓGICA DE VISTA DE JUEGO (RENDERIZADO)
+        // =================================================================
+        
+
+        /**
+         * Maneja el clic en un jugador para selección/deselección en la fase de propuesta.
+         */
+        function handlePlayerClick(event) {
+            if (!gameData || !currentRoundData) return; 
+
+            const isLeader = (currentRoundData && currentActivePlayer === currentRoundData.leader);
+            // La selección de grupo solo es posible si el status es 'waiting-on-leader' y el grupo está vacío. Se obtiene de la API /rounds
+            const isProposalPhase = (currentRoundData && currentRoundData.status === 'waiting-on-leader' && currentRoundData.group.length === 0);
+            
+            if (!isLeader || !isProposalPhase) return;// Solo el líder en la fase de propuesta puede seleccionar
+
+            const playerName = event.currentTarget.dataset.playername;// Nombre del jugador clicado
+            const playerCount = gameData.players.length;// Número total de jugadores
+            const decade = allRoundsData.length || 1; // Década actual
+            const groupSize = getRequiredGroupSize(playerCount, decade);// Tamaño de grupo requerido 
+
+            if (selectedGroup.includes(playerName)) {// Si ya está seleccionado, se deselecciona
+                selectedGroup = selectedGroup.filter(name => name !== playerName);
+            } else {// Si no está seleccionado, se añade si no se ha alcanzado el tamaño máximo
+                if (selectedGroup.length < groupSize) {
+                    selectedGroup.push(playerName);
+                } else {//Mensae de error si se intenta añadir más jugadores del permitido
+                    showPopup(`El tamaño del grupo es ${groupSize}. Ya has seleccionado el máximo.`);
+                }
+            }
+            
+            updateGameStatus(); // Para refrescar la UI
+        }
+
+        /**
+         * Renderiza la vista de juego en curso.
+         */
+        function renderGameView(gameData, roundData, currentDecade) {
+            const playerListDiv = document.getElementById('game-player-list');// Lista de jugadores
+            const controlsDiv = document.getElementById('game-controls');// Controles de juego
+            const controlsInfo = document.getElementById('controls-info');// Info de controles
+            const controlsButtons = document.getElementById('controls-buttons');// Botones de controles
+            
+            playerListDiv.innerHTML = '';// Limpia la lista de jugadores
+            controlsButtons.innerHTML = '';// Limpia los botones de controles
+            
+            const currentLeader = roundData ? roundData.leader : null; // Líder actual de la ronda
+            const activePlayerIsEnemy = gameData.enemies.includes(currentActivePlayer);// Si el jugador activo es Contaminado
+            const activePlayerIsLeader = (currentActivePlayer === currentLeader);// Si el jugador activo es el líder
+            const activePlayerInGroup = roundData ? roundData.group.includes(currentActivePlayer) : false;// Si el jugador activo está en el grupo propuesto
+            
+            // OBTENER VALORES GLOBALES:
+            const playerCount = gameData.players.length;// Número total de jugadores
+            const requiredGroupSize = getRequiredGroupSize(playerCount, currentDecade); // Tamaño de grupo requerido
+            
+            // CÁLCULO DEL MARCADOR: Usa la lista de rondas terminadas.
+            const calculatedScore = calculateScoreFromRounds();
+            const scoreExemplar = calculatedScore.scoreExemplar;// Contador de Ejemplares
+            const scoreEnemy = calculatedScore.scoreEnemy;// Contador de Contaminados
+            
+            const hasExemplarWon = scoreExemplar >= 3;// Si los Ejemplares han ganado
+            const hasEnemyWon = scoreEnemy >= 3;// Si los Contaminados han ganado
+
+            document.getElementById('score-exemplar').textContent = scoreExemplar; // Contador de Ejemplares
+            document.getElementById('score-enemy').textContent = scoreEnemy;   // Contador de Contaminados  
+
+            //Revisa si el juego ha terminado y quiern ha ganado
+            victoryMessage.style.display = 'none';// Oculta el mensaje de victoria por defecto
+            document.getElementById('game-status-bar').style.display = 'block';// Muestra la barra de estado por defecto
+            controlsDiv.style.display = 'block';// Muestra los controles por defecto
+
+            if (hasExemplarWon || hasEnemyWon) {// Si alguno ha ganado
+                const winner = hasExemplarWon ? 'EJEMPLARES (Verde) 🌎' : 'CONTAMINADOS (Rojo) 🦠';
+                victoryMessage.textContent = `¡FIN DEL JUEGO! Ganaron los ${winner} con ${Math.max(scoreExemplar, scoreEnemy)} décadas victoriosas.`;
+                victoryMessage.style.display = 'block';// Muestra el mensaje de victoria
+                document.getElementById('game-status-bar').style.display = 'none';
+                controlsDiv.style.display = 'none';
+                return; 
+            }
+            
+            // Actualiza el marcador y la barra de estado
+            
+            document.getElementById('current-decade').textContent = currentDecade; // Década actual
+            document.getElementById('game-player-count').textContent = playerCount;// Número total de jugadores
+            document.getElementById('active-player-role').textContent = activePlayerIsEnemy ? 'ContaminaDOS' : 'Ejemplar';// Rol del jugador 
+            
+            if (roundData) {// Si hay datos de ronda
+                document.getElementById('current-phase').textContent = `${roundData.phase || 'N/A'}`;// Fase actual
+                controlsInfo.textContent = `Estado de Ronda: ${roundData.status}`;// Estado actual de la ronda
+            } else {// Si no hay datos de ronda
+                document.getElementById('current-phase').textContent = `Iniciando...`;// Fase actual
+                controlsInfo.textContent = `Esperando la primera ronda...`;// Estado actual de la ronda
+            }
+
+            // Refrescar botones según el estado de la ronda
+            if (roundData) {
+                
+                // 1. FASE DE PROPUESTA (status: waiting-on-leader)
+                if (roundData.status === 'waiting-on-leader') {
+                    if (activePlayerIsLeader) {
+                        controlsInfo.textContent = `🚨 LÍDER: Selecciona ${requiredGroupSize} jugadores para el grupo.`;
+                        
+                        const btnPropose = document.createElement('button');
+                        btnPropose.id = 'btn-propose-group';
+                        btnPropose.textContent = `Proponer Grupo (${selectedGroup.length}/${requiredGroupSize})`;
+                        btnPropose.style.backgroundColor = '#007bff';
+                        btnPropose.disabled = (selectedGroup.length !== requiredGroupSize);
+                        btnPropose.onclick = proposeGroup;
+                        controlsButtons.appendChild(btnPropose);
+                    } else {
+                        controlsInfo.textContent = `Esperando que el LÍDER (${currentLeader}) proponga un grupo... (Tamaño requerido: ${requiredGroupSize})`;
+                    }
+                } 
+                
+                // 2.  FASE DE VOTACIÓN (status: "voting")
+                else if (roundData.status === 'voting' && roundData.group.length > 0) {
+                    
+                    // Contar cuántos jugadores han emitido su voto (los que no son null/undefined)
+                    const votesCount = roundData.votes.filter(vote => vote !== null && vote !== undefined).length;
+                    //muestra el contador de votos
+                    controlsInfo.textContent = `📢 VOTA: ¿Aceptas la propuesta del grupo: ${roundData.group.join(', ')}? (${votesCount}/${playerCount} han votado)`;
+                    
+                    // Botones de Votación 
+                    const btnApprove = document.createElement('button');
+                    btnApprove.textContent = 'Aprobar (Sí)';
+                    btnApprove.style.backgroundColor = '#28a745';
+                    btnApprove.onclick = () => voteForGroup(true);
+                    
+                    const btnReject = document.createElement('button');
+                    btnReject.textContent = 'Rechazar (No)';
+                    btnReject.style.backgroundColor = '#dc3545';
+                    btnReject.onclick = () => voteForGroup(false);
+                    
+                    controlsButtons.appendChild(btnApprove);
+                    controlsButtons.appendChild(btnReject);
+                    
+                } 
+                
+                // 3. FASE DE ACCIÓN (status: "waiting-on-group" y grupo definido)
+                else if (roundData.status === 'waiting-on-group' && roundData.group.length > 0) {
+                    
+                    if (activePlayerInGroup) {
+                        controlsInfo.textContent = `⚙️ ACCIÓN: Eres parte del grupo. Elige si **COLABORAR** o **SABOTEAR** (PUT /rounds/{id}).`;
+                        
+                        // Botones de Acción 
+                        const btnCollaborate = document.createElement('button');
+                        btnCollaborate.textContent = 'COLABORAR (True)';
+                        btnCollaborate.style.backgroundColor = '#17a2b8'; 
+                        btnCollaborate.onclick = () => submitAction(true);
+                        
+                        const btnSabotage = document.createElement('button');
+                        btnSabotage.textContent = 'SABOTEAR (False)';
+                        btnSabotage.style.backgroundColor = '#ffc107'; 
+                        btnSabotage.onclick = () => submitAction(false);
+                        
+                        controlsButtons.appendChild(btnCollaborate);
+                        controlsButtons.appendChild(btnSabotage);
+                        
+                    } else {
+                        controlsInfo.textContent = `Esperando la acción del grupo seleccionado: ${roundData.group.join(', ')}...`;
+                    }
+                }
+                
+                // 4. LÓGICA DE CIERRE DE RONDA O ESTADOS NO MANEJADOS
+                else if ( roundData.status === 'ended') { 
+                    controlsInfo.textContent = `🏆 RONDA FINALIZADA. Resultado: ${roundData.result}. Esperando nueva década/ronda...`;
+                } else {
+                    controlsInfo.textContent = `Estado de Ronda: ${roundData.status}`;
+                }
+            } 
+            
+            // Refrescar la lista de jugadores
+
+            gameData.players.forEach((playerName, index) => {
+                const isEnemy = gameData.enemies.includes(playerName);
+                const isLeader = roundData && (playerName === currentLeader); 
+                const isInGroup = roundData && roundData.group.includes(playerName);
+                
+                let className = '';
+                let label = '';
+                
+                // Aqui se asigna el color segun el rol y la visibilidad(los enemies se ven entre ellos y a los ejemplares, los ejemplares ven a todos como ejemplares)
+                if (isLeader) {//El lider se distinge con Dorado
+                    className = 'color-leader'; 
+                    label = '(Líder)';
+                } else if (activePlayerIsEnemy) {
+                    className = isEnemy ? 'color-enemy' : 'color-exemplar';
+                } else {
+                    // Si no soy Contaminado, mi rol se ve siempre como Ejemplar 
+                    className = (playerName === currentActivePlayer) && isEnemy ? 'color-enemy' : 'color-exemplar';
+                }
+                
+                // Determinar si es clicable (Solo si es líder, en fase de propuesta)
+                const isSelectable = roundData && activePlayerIsLeader && roundData.status === 'waiting-on-leader';
+
+                // Construir el elemento
+                const playerElement = document.createElement('div');
+                //Añade la clase selected-for-group si el jugador está en selectedGroup temporal
+                playerElement.className = `game-player-item ${className} ${isSelectable ? 'selectable' : ''} ${selectedGroup.includes(playerName) ? 'selected-for-group' : ''}`;
+                
+                if (isSelectable) {
+                    playerElement.onclick = handlePlayerClick;// Añade el manejador de clic si es seleccionable
+                    playerElement.dataset.playername = playerName;// Para identificar al jugador al hacer clic
+                    playerElement.dataset.playercount = playerCount;// Para identificar el número total de jugadores
+                }
+                
+                let statusIcon = '';// Aquí se construyen los iconos de estado
+                
+                // Muestra si está en el grupo
+                if (isInGroup) {
+                    statusIcon += `<span style="color: #17a2b8; font-weight: bold; margin-left: 10px;">[GRUPO]</span>`;
+                }
+
+               
+                playerElement.innerHTML = `<div>${playerName} ${label}</div><div>${statusIcon}</div>`;
+                playerListDiv.appendChild(playerElement);
+            });
+        }
+        
+        // =================================================================
+        //  LÓGICA DE POLLING (ACTUALIZAR LOBBY)
+        // =================================================================
+
+        async function updateLobby() {
+            if (!currentGameId) return;
+
+            const URL_GAME_INFO = `${URL_BASE}/${currentGameId}`;
+            const playerName = playerNameInput.value.trim();
+            const password = passwordInput.value.trim();
+            
+            const customHeaders = { 'player': playerName };
+            if (password) { customHeaders['password'] = password; }
+
+            const result = await llamarAPI(URL_GAME_INFO, 'GET', null, customHeaders);
+
+            if (result.success) {
+                const fetchedGameData = result.data.data;
+                
+                // Transición a Vista de Juego
+                if (fetchedGameData.status !== 'lobby') {
+                    displayLog(`El juego ha cambiado a estado: ${fetchedGameData.status}. Polling de Lobby detenido.`, 'info');
+                    clearInterval(pollingInterval);
+                    goToGame(currentGameId, playerName, fetchedGameData); 
+                    return; 
+                }
+                
+                // Lógica de Lobby
+                const playerListDiv = document.getElementById('lobby-player-list');// Lista de jugadores en el lobby
+                const playerCount = fetchedGameData.players.length;// Número de jugadores
+                
+                const isOwner = (playerName === fetchedGameData.owner);// Si el jugador actual es el dueño
+                const canStart = (playerCount >= 5 && playerCount <= 10);// Si se puede iniciar (5-10 jugadores)
+                
+                //Si es el dueño, muestra el botón de iniciar juego
+                if (isOwner) {
+                    btnStartGame.style.display = 'block'; 
+                    btnStartGame.disabled = !canStart;
+                    btnStartGame.textContent = canStart 
+                        ? 'Comenzar Partida' 
+                        : `Esperando jugadores (Mínimo 5). Actualmente ${playerCount}.`;
+                } else {
+                    btnStartGame.style.display = 'none'; 
+                }
+
+                document.getElementById('player-count').textContent = playerCount;
+                document.getElementById('player-max').textContent = 10; 
+
+                // Generar lista de jugadores del lobby
+                playerListDiv.innerHTML = '';
+                fetchedGameData.players.forEach(name => {// Recorre la lista de jugadores
+                    let className = (name === fetchedGameData.owner) ? 'owner' : '';// El dueño se destaca
+                    let label = (name === fetchedGameData.owner) ? '(Líder)' : '';// Etiqueta de líder
+                    
+                    const playerElement = document.createElement('div');// Crea el elemento del jugador
+                    playerElement.className = `player-item ${className}`;// Asigna la clase
+                    playerElement.textContent = `${name} ${label}`;// Texto del jugador
+                    playerListDiv.appendChild(playerElement);// Añade a la lista
+                });
+                
+            } else {
+                displayLog(`Error al actualizar el lobby [Status ${result.status}]: ${result.error}. Deteniendo polling.`, 'error');
+                clearInterval(pollingInterval);
+            }
+        }
+        
+        // =================================================================
+        // LÓGICA DE VISTAS INICIALES Y UNIÓN A JUEGO
+        // =================================================================
+
+        //Evento de crear partida (POST /games)
+        document.getElementById('btn-create').addEventListener('click', async () => {
+            const gameName = document.getElementById('gameName').value.trim();// Nombre de la partida
+            const playerName = playerNameInput.value.trim();// Nombre del jugador
+            const password = passwordInput.value.trim();// Contraseña si existe
+            
+            // Validaciones. Aqui llama a la función de validación, para ver si cumple con el minimo y máximo de caracteres
+            if (!validateInputs(gameName, 3, 20, 'Partida') || 
+                !validateInputs(playerName, 3, 20, 'Jugador')) return;
+            if (password && !validateInputs(password, 3, 20, 'Contraseña')) return;
+
+            const createData = { name: gameName, owner: playerName };// Datos para crear la partida
+            if (password) { createData.password = password; }
+            
+            const result = await llamarAPI(URL_BASE, 'POST', createData); // Llama a la API para crear la partida
+
+            if (result.success) { 
+                const newGameId = result.data.data.id;
+                displayLog(`✅ Partida Creada (ID: ${newGameId}). Redirigiendo a Lobby.`, 'success', false);
+                goToLobby(newGameId, playerName); // Va al lobby de la nueva partida
+                
+            } else {//Aqui puede indicar como que ya exite una partida con ese nombre
+                displayLog(`❌ CREACIÓN Fallida [Status ${result.status}]: ${result.error}`, 'error', false);
+            }
+        });
+        
+        //Evento de buscar partidas (GET /games?status=lobby)
+        document.getElementById('btn-search').addEventListener('click', async () => {
+            const gameName = document.getElementById('gameName').value.trim();
+            const playerName = playerNameInput.value.trim();
+            
+            // 1. Validar el nombre del jugador 
+            if (!validateInputs(playerName, 3, 20, 'Jugador')) {
+                return;
+            }
+
+            // 2. Definir los parámetros base (status, page, limit)
+            const params = { 
+                status: 'lobby', 
+                page: 0, 
+                //limit: 50 //Aqui se puede limitar la cantidad de resultados
+            };
+            
+            // 3.  SOLO añade 'name' si se escribe
+            if (gameName.length > 0) {
+                // También validamos la longitud si el usuario ingresó algo
+                if (!validateInputs(gameName, 3, 20, 'Partida')) {
+                    return;
+                }
+                params.name = gameName;
+            } 
+            // Si gameName está vacío, n se añade a params.
+
+            const searchParams = new URLSearchParams(params);
+            const URL_BUSCAR = `${URL_BASE}?${searchParams.toString()}`;
+            
+            const customHeaders = { 'player': playerName };
+            const result = await llamarAPI(URL_BUSCAR, 'GET', null, customHeaders); 
+            
+            resultsDiv.innerHTML = ''; 
+
+            if (result.success) { 
+                const games = result.data.data;
+                
+                if (games && games.length > 0) {
+                    displayLog(`✅ ${games.length} Partida(s) encontrada(s) en LOBBY.`, 'success', false);
+                    games.forEach(game => {
+                        const itemHtml = document.createElement('div');
+                        itemHtml.className = 'game-item';
+                        itemHtml.innerHTML = `
+                            <div class="game-info">
+                                <div class="game-name">${game.name}</div> 
+                                <div class="game-status">Creador: ${game.owner} (${game.players.length}/10 jugadores)</div>
+                            </div>
+                            <button class="btn-join-list" 
+                                data-game-id="${game.id}"
+                                data-player-count="${game.players.length}" // Conteo de jugadores
+                                data-max-players="10"                     //  Límite máximo
+                            >
+                                Unirse
+                            </button>
+                        `;
+                        resultsDiv.appendChild(itemHtml);
+                    });
+                    document.querySelectorAll('.btn-join-list').forEach(button => {
+                        button.addEventListener('click', handleJoinGame);
+                    });
+                } else {
+                    const logMessage = gameName.length > 0 
+                        ? `ℹ️ No se encontraron partidas con el filtro '${gameName}' en estado LOBBY.`
+                        : `ℹ️ No se encontraron partidas en estado LOBBY.`;
+                    displayLog(logMessage, 'info', false);
+                }
+            } else {
+                displayLog(`❌ BÚSQUEDA Fallida [Status ${result.status}]: ${result.error}`, 'error', false);
+            }
+        });
+
+
+        //Evento de unirse a una partida (PUT /games/{gameId})
+        async function handleJoinGame(event) {
+            const button = event.target;
+            const gameId = event.target.dataset.gameId;
+            const playerName = document.getElementById('playerName').value.trim();
+            const password = passwordInput.value.trim(); 
+            const currentPlayers = parseInt(button.dataset.playerCount, 10);
+            const maxPlayers = parseInt(button.dataset.maxPlayers, 10)
+
+            if (!validateInputs(playerName, 3, 20, 'Jugador')) {
+                displayLog("⚠️ Debes ingresar tu nombre de jugador (3-20 chars) para unirte.", 'error');
+                return;
+            }
+            if (password && !validateInputs(password, 3, 20, 'Contraseña')) return;
+
+            if (currentPlayers >= maxPlayers) {
+                showPopup(`Error: La partida ya alcanzó el límite máximo de ${maxPlayers} jugadores.`);
+                displayLog(`❌ UNIÓN Fallida a '${gameId}': El lobby está lleno (${currentPlayers}/${maxPlayers}).`, 'error');
+                return; // Detiene la ejecución si el lobby está lleno
+            }
+
+            const URL_UNIRSE = `${URL_BASE}/${gameId}`;
+    
+            const joinHeaders = { 'player': playerName };
+            if (password) { 
+                joinHeaders['password'] = password; 
+            }
+    
+            const bodyData = { 
+                player: playerName, 
+                password: password || "" 
+            }; 
+
+            const result = await llamarAPI(URL_UNIRSE, 'PUT', bodyData, joinHeaders);
+
+            if (result.success) { 
+                displayLog(`✅ Unido con éxito a la partida '${gameId}'. Redirigiendo a Lobby.`, 'success');
+                goToLobby(gameId, playerName); 
+            } else {
+                displayLog(`❌ UNIÓN Fallida a '${gameId}' [Status ${result.status}]: ${result.error}`, 'error');
+            }
+        }
+
+        //Evento de iniciar partida (HEAD /games/{gameId}/start). Solo el dueño puede hacerlo
+        btnStartGame.addEventListener('click', async () => {
+            if (!currentGameId) return;
+
+            const playerName = playerNameInput.value.trim();
+            const password = passwordInput.value.trim();
+            
+            const URL_START = `${URL_BASE}/${currentGameId}/start`;
+            
+            const startHeaders = { 'player': playerName };
+            if (password) { startHeaders['password'] = password; }
+
+            const result = await llamarAPI(URL_START, 'HEAD', null, startHeaders);
+
+            if (result.success) { 
+                displayLog(`✅ Partida iniciada con éxito!`, 'success');
+                updateLobby(); 
+            } else {
+                displayLog(`❌ FALLA al iniciar partida [Status ${result.status}]: ${result.error}.`, 'error');
+            }
+        });
+    </script>
+
+</body>
+</html>

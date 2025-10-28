@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>contaminaDOS</title>
+  <link rel="icon" href="img/icon.png">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="intro.css"> 
+</head>
+<body class="intro-active">
+
+<!-- ===== PRESENTACIÓN ===== -->
+<div id="presentation">
+  <div id="p1" class="presentation-text">GROUP-C PRESENTS</div>
+  <div id="p2" class="presentation-text">Proyecto IF-6000</div>
+</div>
+
+<!-- ===== CONTENIDO PRINCIPAL ===== -->
+<div class="main-container">
+    <div id="title-container">
+        <h1>
+            <span class="contamina">contamina</span><span class="dos">DOS</span>
+        </h1>
+    </div>
+
+    <div class="container">
+        <div id="initial-view">
+        <div class="container-content">
+            <form id="gameActionForm">
+                <input type="text" id="playerName" required placeholder="Nickname" minlength="3" maxlength="20"><br>
+                <input type="text" id="gameName" placeholder="Nombre de Partida" minlength="3" maxlength="20"><br>
+                <input type="password" id="password" placeholder="Contraseña" minlength="3" maxlength="20"><br>
+                <!-- Configurar URL del servidor -->
+<label for="apiUrl" style="font-size: 12px;"></label>
+<input 
+  type="text" 
+  id="apiUrl" 
+  placeholder="URL del servidor"
+  style="font-size: 12px; width: 100%; margin-top: 5px;"
+>
+<button type="button" id="btn-save-api" style="margin-top: 8px;">Guardar URL</button>
+<p id="api-status" style="font-size: 12px; color: #7ff;"></p>
+
+                <div class="buttons">
+                    <button type="button" id="btn-search">Buscar Partidas</button>
+                    <button type="button" id="btn-create">Crear Partida</button> 
+                </div>
+            </form>
+            <h2>Resultados de búsqueda</h2>
+            <div id="results">Use el botón "Buscar Partidas" para ver las partidas disponibles.</div>
+        </div>
+        </div>
+
+        <div id="lobby-view" style="display:none;">
+            <h1 id="lobby-title">Lobby de Partida: </h1>
+            <div class="status-bar">Esperando jugadores...</div>
+            <h2>Jugadores Unidos (<span id="player-count">0</span>/<span id="player-max">10</span>)</h2>
+            <div id="lobby-player-list"></div>
+            <button id="btn-start-game" disabled style="background-color: #3f51b5; margin-top: 20px;">Comenzar Partida (Mínimo 5)</button>
+        </div>
+
+        <div id="game-view" style="display:none;">
+            <div id="victory-message" style="display:none;"></div>
+            <div class="status-bar" id="game-status-bar">
+                Década actual: <span id="current-decade">1</span>
+                | Fase: <span id="current-phase">Cargando...</span>
+                | Rol: <span id="active-player-role">Cargando...</span>
+            </div>
+            <div class="score">
+                <span id="score-ejemplar" class="exemplar">0</span> : 
+                <span id="score-psicopata" class="enemy">0</span>
+            </div>
+            <div id="game-controls">
+                <p id="controls-info" class="controls-info">Esperando acción</p>
+
+                <div id="controls-buttons" class="buttons"></div>
+            </div>
+            <h2>Jugadores (<span id="game-player-count">0</span>)</h2>
+            <div id="game-player-list"></div>
+        </div>
+    </div>
+
+    <div id="popup-message"></div>
+</div>
+
+<!-- animaciones -->
+<script>
+function wait(ms){ return new Promise(r => setTimeout(r, ms)); }
+
+async function playIntro() {
+  const p1 = document.getElementById('p1');
+  const p2 = document.getElementById('p2');
+  const pres = document.getElementById('presentation');
+  const main = document.querySelector('.main-container');
+
+  // Mostrar textos uno a uno
+  p1.style.animation = 'fadeInText 2s forwards';
+  await wait(2500);
+  p1.style.animation = 'fadeOutText 2s forwards';
+  await wait(2000);
+  p2.style.animation = 'fadeInText 2s forwards';
+  await wait(2500);
+  p2.style.animation = 'fadeOutText 2s forwards';
+  await wait(2000);
+
+  // Reactivar animaciones del título
+  document.body.classList.remove('intro-active');
+  void document.querySelector('.contamina').offsetWidth; // reflow
+
+  // Mostrar la ui principal
+  main.style.opacity = 1;
+
+  // Ocultar presentación
+  pres.style.transition = 'opacity 800ms ease';
+  pres.style.opacity = 0;
+  await wait(800);
+  pres.remove();
+}
+
+window.addEventListener('load', playIntro);
+</script>
+
+<script>
+const dosSpan = document.querySelector('.dos');
+const container = document.querySelector('.container');
+const containerContent = document.querySelector('.container-content');
+
+if (dosSpan) {
+  dosSpan.addEventListener('animationend', () => {
+      container.style.opacity = 1;
+      setTimeout(() => {
+          containerContent.classList.add('show');
+      }, 500);
+  });
+}
+</script>
+
+<script type="module" src="js/main.js"></script>
+
+</body>
+</html>
+
+
+

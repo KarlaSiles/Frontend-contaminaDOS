@@ -1,0 +1,714 @@
+/*
+    =================================================================
+    ESTILOS CSS
+    =================================================================
+*/
+/* Importar fuente pixel retro */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap'); /* fuente pixel retro */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=New+Rocker&display=swap');
+/* ----------------- BODY ----------------- */
+body {
+    background-image: url('gft/test.gif'); /* Ruta de tu imagen */
+    background-color: rgb(0, 0, 0); /* Color de respaldo si la imagen no carga */
+    background-size: cover; /* Hace que la imagen cubra toda la pantalla */
+    background-position: center; /* Centra la imagen */
+    background-repeat: no-repeat; /* Evita que se repita */
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Fondo si ganan los psicópatas */
+body.enemy-win {
+  background: url('gft/enemies.gif') center/cover no-repeat fixed;
+  filter: brightness(0.6) contrast(1.3) saturate(1.4);
+}
+
+body.enemy-win::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  animation: flicker 3s infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes flicker {
+  0% { opacity: 0.2; }
+  50% { opacity: 0.5; }
+  100% { opacity: 0.3; }
+}
+
+
+
+.main-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* TÍTULO */
+#title-container h1 {
+    font-family: 'New Rocker', cursive;
+    font-size: 5.2em;
+    letter-spacing: 3px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.contamina {
+    color: #d4af37;
+    text-shadow: 0 0 12px #000, 0 0 20px #422206;
+    opacity: 0;
+    display: inline-block;
+    animation: fadeIn 2s ease-out forwards, glowPulse 3s infinite alternate ease-in-out;
+}
+
+.dos {
+    color: #ff0000; 
+    font-size: 1.3em;
+    text-shadow: 0 0 10px #000, 0 0 20px #ff0000;
+    opacity: 0;
+    display: inline-block;
+    animation: fadeIn 2s ease-out 2s forwards, glowPulseRed 3s infinite alternate ease-in-out;
+}
+
+
+
+/* Estilo h2 estilo videojuego retro */
+.container h2 {
+    text-align: center;
+    font-family: 'Press Start 2P', cursive; /* Pixel-art retro */
+    color: #ffffff;                         
+    font-size: 1.4em;
+    text-shadow: 
+        2px 2px 0 #000, 
+       -2px 2px 0 #000, 
+        2px -2px 0 #000, 
+       -2px -2px 0 #000;                   /* Borde negro fuerte */
+    margin: 20px 0;
+    animation: arcadeGlow 1s infinite alternate; /* Animación de brillo */
+}
+
+/* Animación de parpadeo / resplandor */
+@keyframes arcadeGlow {
+    from {
+        color: #ffffff;
+        text-shadow: 
+            2px 2px 0 #000, 
+           -2px 2px 0 #000, 
+            2px -2px 0 #000, 
+           -2px -2px 0 #000, 
+           0 0 5px #fff, 0 0 10px #fff;
+    }
+    to {
+        color: #fffa7c;
+        text-shadow: 
+            2px 2px 0 #000, 
+           -2px 2px 0 #000, 
+            2px -2px 0 #000, 
+           -2px -2px 0 #000, 
+           0 0 10px #fff, 0 0 20px #ff0;
+    }
+}
+
+
+/* ANIMACIONES */
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.8); text-shadow: none; }
+    to { opacity: 1; transform: scale(1); }
+}
+@keyframes glowPulse {
+    from { text-shadow: 0 0 10px #000, 0 0 20px #422206, 0 0 30px #d4af37; }
+    to { text-shadow: 0 0 20px #000, 0 0 30px #c9971c, 0 0 50px #ffcc33; }
+}
+@keyframes glowPulseRed {
+    from { text-shadow: 0 0 10px #000, 0 0 20px #ff0000, 0 0 30px #ff5555; }
+    to { text-shadow: 0 0 20px #000, 0 0 30px #ff2222, 0 0 50px #ff5555; }
+}
+
+/* CONTAINER HOLOGRÁFICO */
+/* CONTAINER ZAFIRO ESMERALDADO */
+
+.container {
+    width: 90%;
+    max-width: 500px;
+    padding: 25px;
+    border-radius: 18px;
+    border: 2px solid rgba(0, 200, 255, 0.35); 
+    background: linear-gradient(
+        145deg,
+        rgba(0, 90, 100, 0.85),
+        rgba(0, 60, 120, 0.9),
+        rgba(0, 150, 120, 0.6)
+    ); /* mezcla verde-azul */
+    backdrop-filter: blur(10px) saturate(160%);
+    -webkit-backdrop-filter: blur(10px) saturate(160%);
+    opacity: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+
+
+    box-shadow:
+        0 0 15px rgba(0, 255, 200, 0.25),
+        0 0 25px rgba(0, 180, 255, 0.35),
+        0 0 50px rgba(0, 120, 255, 0.25);
+    transition: opacity 1s ease-out, box-shadow 1.2s ease-in-out;
+    position: relative;
+
+    /* === NUEVO: Scroll solo vertical === */
+    max-height: 80vh;       /* limita el alto visible */
+    overflow-y: auto;       /* activa scroll de arriba a abajo */
+    overflow-x: hidden;     /* evita scroll horizontal */
+    scrollbar-width: thin;  
+}
+
+.container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.container::-webkit-scrollbar-thumb {
+  background: rgba(0, 255, 200, 0.4);
+  border-radius: 4px;
+}
+
+.container::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 255, 200, 0.8);
+}
+
+.container::-webkit-scrollbar-track {
+  background: rgba(0, 30, 60, 0.4);
+}
+
+
+
+/* Reflejo interno translúcido */
+.container::before {
+    content: "";
+    position: absolute;
+    top: -20%;
+    left: -20%;
+    width: 140%;
+    height: 140%;
+    background: linear-gradient(
+        60deg,
+        transparent 40%,
+        rgba(255, 255, 255, 0.15) 50%,
+        transparent 60%
+    );
+    transform: translateX(-100%);
+    animation: sapphireGlow 7s infinite linear;
+    border-radius: 18px;
+}
+
+/* Efecto hover más intenso */
+.container:hover {
+    box-shadow:
+        0 0 25px rgba(0, 255, 220, 0.4),
+        0 0 50px rgba(0, 180, 255, 0.5),
+        0 0 90px rgba(0, 150, 255, 0.3);
+}
+
+/* Animación del reflejo móvil */
+@keyframes sapphireGlow {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+
+/* CONTENIDO INTERNO */
+.container-content {
+    opacity: 0;
+    transition: opacity 1s ease-out;
+}
+.container-content.show {
+    opacity: 1;
+}
+
+/* === INPUTS ESTILO PIXEL ARCADE RETRO === */
+input[type="text"],
+input[type="password"] {
+    width: 90%;
+    padding: 10px;
+    margin: 10px 0;
+    font-size: 16px;
+    font-family: 'Press Start 2P', monospace; /* Fuente pixel retro */
+    color: #00ffcc;
+    background-color: #0d1b1e;
+    border: 3px solid #00ffaa;
+    border-radius: 0; 
+    box-shadow: 0 0 10px #00ffaa55, inset 0 0 5px #003333;
+    text-shadow: 0 0 3px #00ffaa;
+    transition: all 0.2s ease;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus {
+    outline: none;
+    border-color: #00ffff;
+    box-shadow: 0 0 15px #00ffffaa, inset 0 0 8px #004444;
+    background-color: #001f1f;
+    color: #ffffff;
+}
+
+/* Placeholder con brillo tenue */
+input::placeholder {
+    color: #00ffaa88;
+    text-shadow: 0 0 2px #00ffaa44;
+}
+
+
+/* --- Botones estilo pixel arcade retro --- */
+.buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    gap: 10px;
+}
+
+button {
+    flex-grow: 1;
+    padding: 14px 18px;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 10px;
+    color: #fff;
+    background: linear-gradient(180deg, #007bff 0%, #0040ff 100%);
+    border: 3px solid #000;
+    box-shadow:
+        0 4px #000,
+        inset -2px -2px 0 #001a66,
+        inset 2px 2px 0 #33a1ff;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.15s ease-in-out;
+    border-radius: 0; /* más “pixelado” */
+}
+
+/* --- Efecto hover tipo arcade --- */
+button:hover {
+    background: linear-gradient(180deg, #33a1ff 0%, #007bff 100%);
+    transform: translateY(-2px);
+    box-shadow:
+        0 6px #000,
+        0 0 10px #33a1ff,
+        inset -2px -2px 0 #001a66,
+        inset 2px 2px 0 #66ccff;
+}
+
+/* --- Efecto presionado --- */
+button:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px #000 inset;
+}
+
+/* Colores personalizados por botón */
+#btn-search {
+    background: linear-gradient(180deg, #00b7ff 0%, #0066ff 100%);
+    border-color: #000;
+}
+#btn-create {
+    background: linear-gradient(180deg, #28a745 0%, #0d6400 100%);
+    border-color: #000;
+}
+
+#btn-search:hover {
+    background: linear-gradient(180deg, #33ccff 0%, #0099ff 100%);
+    box-shadow: 0 0 12px #33ccff;
+}
+
+#btn-create:hover {
+    background: linear-gradient(180deg, #4aff72 0%, #28a745 100%);
+    box-shadow: 0 0 12px #4aff72;
+}
+
+
+
+/* Estilos de Lobby */
+#lobby-view h2 {
+    color: #007bff;
+    margin-top: 0;
+}
+
+#lobby-player-list {
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 5px;
+    min-height: 100px;
+    text-align: left;
+    background-color: #fff;
+}
+
+.player-item {
+    padding: 5px 0;
+    border-bottom: 1px dotted #ddd;
+}
+
+.player-item:last-child {
+    border-bottom: none;
+}
+
+.owner {
+    font-weight: bold;
+    color: #28a745;
+}
+
+.status-bar {
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+    border-radius: 5px;
+    font-size: 0.8em;
+    font-family: 'Press Start 2P', cursive;
+}
+
+.controls-info {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 15px;
+  color: #ffffff;
+  text-shadow: 0 0 5px #000000;
+  white-space: pre-wrap; /* mantiene saltos de línea */
+}
+
+
+
+/* Estilos de resultados/log */
+/* Contenedor que centra el panel */
+#results-container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+/* Panel con scroll para los resultados */
+#results {
+    font-family: 'Orbitron', sans-serif;
+    color: #00fff2;
+    text-shadow: 0 0 8px #00fff2, 0 0 16px #0099ff, 0 0 24px #0055ff;
+    font-size: 0.95em;
+    background: rgba(0, 10, 20, 0.5);
+    border: 2px solid rgba(0, 255, 255, 0.3);
+    border-radius: 12px;
+    width: 90%;
+    max-width: 420px;
+    max-height: 280px; /* visible solo 8 aprox */
+    overflow-y: auto;
+    padding: 12px 16px;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.25);
+    text-align: left;
+}
+
+/* Cada partida */
+#results div {
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(0, 255, 255, 0.1);
+}
+
+/* Hover estilo arcade */
+#results div:hover {
+    color: #00ccff;
+    text-shadow: 0 0 10px #00ccff, 0 0 18px #0099ff;
+    cursor: pointer;
+}
+
+
+#results::-webkit-scrollbar {
+    width: 6px;
+}
+#results::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.3);
+}
+#results::-webkit-scrollbar-thumb {
+    background-color: #00fff2;
+    border-radius: 10px;
+}
+
+.game-item {
+    display: flex;
+    justify-content: space-between;
+    /* Mantiene la información a la izquierda y el botón a la derecha */
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px dashed #ccc;
+}
+
+.game-info {
+    flex-grow: 1;
+    min-width: 0;
+    padding-right: 15px;
+}
+
+.game-status,
+.game-players {
+    font-size: 0.9em;
+    color: #6c757d;
+}
+
+#lobby-title {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 24px; 
+  color: #00ffcc; /* color tipo neón */
+  text-shadow: 0 0 10px #00ffcc, 0 0 20px #0088aa;
+  letter-spacing: 3px;
+  text-align: center;
+  margin-top: 20px;
+}
+
+#lobby-player-list {
+   font-family: 'Press Start 2P', cursive;
+  font-size: 16px; 
+  color: #000000; /* color tipo neón */
+  text-shadow: 0 0 10px #00ffcc, 0 0 20px #0088aa;
+  letter-spacing: 3px;
+  text-align: center;
+  margin-top: 20px;
+}
+
+/* Estilo base para los botones de acción en la lista (Unirse/Reconectar) */
+.btn-action-list {
+    background-color: #007bff;
+    /* Azul por defecto (para 'Unirse') */
+    color: white;
+    padding: 8px 15px;
+    font-weight: bold;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    flex-shrink: 0;
+    margin: 0;
+    border: none;
+    /* Asegurar que no hay borde que interfiera */
+    min-width: 120px;
+    /* Definir un ancho mínimo */
+}
+
+.btn-action-list:hover {
+    background-color: #0056b3;
+}
+
+
+.error {
+    color: #500e7c;
+    font-weight: bold;
+}
+
+/* --- ESTILOS DE JUEGO EN CURSO --- */
+.score {
+    font-family: 'Press Start 2P', cursive;
+    text-align: center;
+    font-size: 2.0em;
+    font-weight: bold;
+    margin: 15px 0;
+
+}
+
+
+.score .exemplar {
+    color: #28a745;
+}
+
+.score .enemy {
+    color: #dc3545;
+}
+
+#game-player-list {
+font-family: 'Press Start 2P', cursive;
+  font-size: 14px; 
+    border: 1px solid #ced4da;
+    padding: 10px;
+    border-radius: 6px;
+    min-height: 150px;
+    text-align: left;
+    background-color: #fff;
+}
+
+.game-player-item {
+    padding: 8px 0;
+    border-bottom: 1px dotted #ddd;
+    display: flex;
+    justify-content: space-between;
+    cursor: default;
+    align-items: center;
+}
+
+/* Colores de roles y líder */
+.color-leader {
+    color: #28a745;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px #000;
+}
+
+.color-enemy {
+    color: #dc3545;
+    font-weight: 500;
+}
+
+.color-exemplar {
+    color: #28a745;
+    font-weight: 500;
+}
+
+/* Estilos de selección de grupo */
+.selectable {
+    cursor: pointer;
+    transition: background-color 0.1s;
+}
+
+.selectable:hover {
+    background-color: #f0f8ff;
+}
+
+.selected-for-group {
+    background-color: #add8e6;
+    font-weight: bold;
+    border: 2px solid #007bff;
+    padding: 6px 8px;
+    margin: 2px 0;
+    border-radius: 4px;
+}
+
+/* Estilos de controles de juego, los botones */
+#game-controls {
+    margin: 20px 0;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+#game-controls button {
+    margin: 5px;
+    flex-grow: 1;
+}
+
+/* Votos y acciones */
+.vote-status {
+    margin-left: 10px;
+    font-style: italic;
+    font-weight: bold;
+}
+
+.vote-approved {
+    color: #28a745;
+}
+
+.vote-rejected {
+    color: #dc3545;
+}
+
+/* VISTA DE VICTORIA */
+#victory-message {
+    padding: 20px;
+    background-color: #ffc107;
+    color: #333;
+    border-radius: 8px;
+    margin: 20px 0;
+    font-size: 1.5em;
+    font-family: 'Press Start 2P', cursive;
+    text-align: center;
+    font-weight: bold;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* POPUP con est muestra errores*/
+#popup-message {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px;
+    background-color: #781ab8;
+    color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.5s;
+}
+
+/* Contenedor del rol (imagen + texto alineados) */
+.role-display {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Press Start 2P', cursive;
+}
+
+/* Imagen del rol */
+.role-img {
+  width: 40px;
+  height: 40px;
+  image-rendering: pixelated;
+}
+
+/* Texto del rol */
+.role-text {
+  font-size: 10px;
+  text-shadow: 
+    2px 2px 0 #000,
+    -2px 2px 0 #000,
+    2px -2px 0 #000,
+    -2px -2px 0 #000;
+}
+
+/* Colores por tipo de jugador */
+.exemplar-text {
+  color: #4eff79; 
+}
+
+.enemy-text {
+  color: #ff3b3b; 
+}
+
+
+/* Tipografía arcade + borde negro */
+.arcade-text {
+  font-family: 'Press Start 2P', cursive;
+  color: white;
+  font-size: 12px;
+  text-shadow:
+    -1px -1px 0 black,
+     1px -1px 0 black,
+    -1px  1px 0 black,
+     1px  1px 0 black;
+  letter-spacing: 1px;
+  white-space: pre-wrap;
+}
+
+
+/* Cursor tipo bloque pixeleado */
+.arcade-cursor {
+  display: inline-block;
+  width: 10px;
+  height: 16px;
+  margin-left: 6px;
+  background: #ffffff;
+  -webkit-text-stroke: 0;
+  animation: blinkCursor 800ms steps(1) infinite;
+  vertical-align: bottom;
+  box-shadow:
+    1px 1px 0 #000,
+   -1px -1px 0 #000;
+}
+
+/* Alternativa más delgada si la caja es grande */
+.arcade-cursor.small { height: 12px; width: 6px; margin-left: 4px; }
+
+@keyframes blinkCursor {
+  0% { opacity: 1; }
+  50% { opacity: 0; }
+  100% { opacity: 1; }
+}
