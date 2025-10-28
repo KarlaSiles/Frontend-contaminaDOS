@@ -1,31 +1,10 @@
-# 🦠 ContaminaDOS: Interfaz Web con API
+### Jugar 
 
-Este proyecto es la interfaz de usuario web para el juego de roles ocultos "ContaminaDOS", diseñado para interactuar con la [API externa](https://app.swaggerhub.com/apis/UCR-SA/contaminaDOS/1.0.1).
-
-El desarrollo está implementado en **HTML, CSS y JavaScript (Vanilla JS)**. El código JS está consolidado en una **arquitectura monolítica** de un solo archivo (`script.js`) para simplificar la ejecución local, evitando problemas de seguridad con los módulos de JavaScript (ES Modules).
-
-## Inicio Rápido (Cómo Jugar)
-
-### Ejecución Local
-
-Debido a que el código JavaScript está en un solo archivo y **no utiliza módulos (`import/export`)**, puedes ejecutar el juego directamente desde tu navegador:
-
-1.  Descarga o clona el repositorio.
-2.  Abre el archivo **`index.html`** directamente en tu navegador (Chrome, Firefox, Edge, etc.). La ruta se verá como `file:///.../index.html`.
-
-### Recomendación (Práctica Estándar)
-
-Aunque la ejecución directa funciona, la mejor práctica en desarrollo web es usar un servidor local para simular un entorno de producción (por ejemplo, usando la extensión **Live Server** de VS Code), ya que las restricciones de seguridad son más parecidas al mundo real.
-
-### Jugar / Flujo Principal
-
-1.  **Crear Partida:** Ingresa tu nombre de jugador, un nombre para la partida y haz clic en "Crear Partida".
-2.  **Unirse:** Busca una partida existente y haz clic en "Unirse" para entrar al Lobby.
+1.  **Crear Partida:** Ingrese nombre de jugador, un nombre para la partida y haga clic en "Crear Partida".
+2.  **Unirse:** Busque una partida existente y haga clic en "Unirse" para entrar al Lobby.
 3.  **Inicio de Partida:** Cuando haya entre 5 y 10 jugadores, el **Líder** (dueño de la partida) puede presionar "Comenzar Partida".
 
 ## Componentes Clave
-
-El archivo **`script.js`** maneja todo el estado del juego mediante las siguientes funciones y constantes:
 
 | Componente | Descripción | Tasa/Detalle |
 | :--- | :--- | :--- |
