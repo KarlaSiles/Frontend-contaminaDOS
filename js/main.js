@@ -57,62 +57,72 @@ document.getElementById('btn-create').addEventListener('click', async () => {
 
 // BUSCAR PARTIDAS 
 document.getElementById('btn-search').addEventListener('click', async () => {
-  const gameName = document.getElementById('gameName').value.trim();
-  const playerName = elements.playerNameInput.value.trim();
+    const gameName = document.getElementById('gameName').value.trim();
+    const playerName = elements.playerNameInput.value.trim();
 
-  if (!validateInputs(playerName, 3, 20, 'Jugador')) return;
+    if (!validateInputs(playerName, 3, 20, 'Jugador')) return;
 
-  const params = { status: 'lobby', page: 0 };
-  if (gameName.length > 0) {
-    if (!validateInputs(gameName, 3, 20, 'Partida')) return;
-    params.name = gameName;
-  }
+    
+    let params = { page: 0 };
 
-  const URL_BUSCAR = `${URL_BASE}?${new URLSearchParams(params).toString()}`;
-  const result = await llamarAPI(URL_BUSCAR, 'GET', null, { player: playerName });
+    // Filtro por nombre del input principal
+    if (gameName.length >= 3) params.name = gameName;
 
-  elements.resultsDiv.innerHTML = '';
-  if (result.success) {
-    const games = result.data.data || [];
-    if (games.length > 0) {
-      displayLog(`${games.length} partidas encontradas.`, 'success', false);
-      games.forEach(game => {
-        const itemHtml = document.createElement('div');
-        itemHtml.className = 'game-item';
+    // Filtro del menú
+    if (filterName.value.length >= 3)
+        params.name = filterName.value.trim();
 
-        // Determinar si la partida está llena
-        const isFull = game.players.length >= 10;
-        const buttonText = isFull ? 'Partida llena' : 'Unirse';
-        const buttonDisabled = isFull ? 'disabled' : '';
+    if (filterLobby.checked)
+        params.status = "lobby";
 
-        itemHtml.innerHTML = `
-          <div class="game-info">
-            <div class="game-name">${game.name}</div>
-            <div class="game-status">
-              Creador: ${game.owner} (${game.players.length}/10 jugadores)
-            </div>
-          </div>
-          <button class="btn-join-list" 
-                  data-game-id="${game.id}" 
-                  data-player-count="${game.players.length}"
-                  ${buttonDisabled}>
-            ${buttonText}
-          </button>
-        `;
-        elements.resultsDiv.appendChild(itemHtml);
-      });
+    if (filterStarted.checked)
+        params.status = "rounds";
 
-      // Agregar eventos solo a los botones habilitados
-      document.querySelectorAll('.btn-join-list:not([disabled])')
-        .forEach(btn => btn.addEventListener('click', handleJoinGame));
+    if (filterEnded.checked)
+      params.status = "ended";
 
-    } else {
-      displayLog('No se han encontrado partidas con ese nombre', 'info', false);
+
+    // Construcción de la URL
+    const URL_BUSCAR = `${URL_BASE}?${new URLSearchParams(params).toString()}`;
+
+    const result = await llamarAPI(URL_BUSCAR, 'GET', null, { player: playerName });
+
+    elements.resultsDiv.innerHTML = '';
+    if (!result.success) {
+        displayLog(`Error buscando partidas: ${result.error}`, 'error');
+        return;
     }
-  } else {
-    displayLog(`Fallo al buscar partida [Status ${result.status}]: ${result.error}`, 'error', false);
-  }
+
+    const games = result.data.data || [];
+    if (games.length === 0) {
+        elements.resultsDiv.innerHTML = '<div>No se encontraron partidas.</div>';
+        return;
+    }
+
+    displayLog(`${games.length} partidas encontradas.`, 'success');
+
+    games.forEach(game => {
+        const item = document.createElement("div");
+        item.className = "game-item";
+        item.innerHTML = `
+            <div class="game-info">
+                <div class="game-name">${game.name}</div>
+                <div class="game-status">
+                    Estado: ${game.status} — Jugadores: ${game.players.length}
+                </div>
+            </div>
+            <button class="btn-join-list" data-game-id="${game.id}">
+                Unirse
+            </button>
+        `;
+        elements.resultsDiv.appendChild(item);
+    });
+
+    document.querySelectorAll('.btn-join-list').forEach(btn =>
+        btn.addEventListener('click', handleJoinGame)
+    );
 });
+
 
 // UNIRSE A PARTIDA 
 async function handleJoinGame(event) {
@@ -152,3 +162,32 @@ elements.btnStartGame.addEventListener('click', async () => {
   else displayLog(`Fallo al iniciar la partida [${result.status}]: ${result.error}`, 'error');
 });
 
+
+// =====================
+// MANEJO DEL FILTRO
+// =====================
+const btnFilter = document.getElementById("btn-filter");
+const filterMenu = document.getElementById("filter-menu");
+const filterEnded = document.getElementById("filter-ended");
+const filterName = document.getElementById("filter-name");
+const filterLobby = document.getElementById("filter-lobby");
+const filterStarted = document.getElementById("filter-started");
+const btnApplyFilter = document.getElementById("btn-apply-filter");
+
+btnFilter.addEventListener("click", () => {
+    filterMenu.style.display = filterMenu.style.display === "none" ? "block" : "none";
+});
+
+
+
+const filterChecks = [filterLobby, filterStarted, filterEnded];
+
+filterChecks.forEach(check => {
+    check.addEventListener("change", () => {
+        if (check.checked) {
+            filterChecks.forEach(other => {
+                if (other !== check) other.checked = false;
+            });
+        }
+    });
+});

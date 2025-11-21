@@ -52,6 +52,31 @@
         </div>
         </div>
 
+        <!-- FILTRO -->
+        <div id="filter-container">
+            <button id="btn-filter">Filtrar ▼</button>
+
+            <div id="filter-menu" style="display:none;">
+                <input type="text" id="filter-name" placeholder="Buscar por nombre..." minlength="3" maxlength="20">
+
+                <label class="filter-option">
+                    <input type="checkbox" id="filter-lobby"> Lobby
+                </label>
+
+                <label class="filter-option">
+                    <input type="checkbox" id="filter-started"> Iniciada
+                </label>
+
+                <label class="filter-option">
+                    <input type="checkbox" id="filter-ended"> Finalizada
+                </label>
+
+
+                <button id="btn-apply-filter" class="apply-btn">Aplicar filtro</button>
+            </div>
+        </div>
+
+
         <div id="lobby-view" style="display:none;">
             <h1 id="lobby-title">Lobby de Partida: </h1>
             <div class="status-bar">Esperando jugadores...</div>

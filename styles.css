@@ -712,3 +712,55 @@ font-family: 'Press Start 2P', cursive;
   50% { opacity: 0; }
   100% { opacity: 1; }
 }
+
+/* ==== FILTRO ==== */
+#filter-container {
+    margin-top: 15px;
+    text-align: left;
+}
+
+#btn-filter {
+    background: #0077ff;
+    color: white;
+    padding: 8px 14px;
+    border: 2px solid #0af;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Press Start 2P';
+    font-size: 12px;
+}
+
+#filter-menu {
+    background: rgba(0,0,0,0.7);
+    border: 2px solid #0af;
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 10px;
+    animation: fadeIn .2s ease-out;
+}
+
+.filter-option {
+    display: block;
+    margin-top: 10px;
+    color: #fff;
+    font-family: 'Press Start 2P';
+    font-size: 12px;
+}
+
+#filter-menu input[type="text"] {
+    width: 90%;
+    padding: 6px;
+    margin-bottom: 10px;
+    font-family: 'Press Start 2P';
+}
+
+.apply-btn {
+    margin-top: 10px;
+    background: #00b050;
+    color: black;
+    font-weight: bold;
+    border: 2px solid #0f0;
+    padding: 6px 10px;
+    width: 100%;
+    cursor: pointer;
+}
