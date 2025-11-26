@@ -32,9 +32,11 @@ export const elements = {
 // Función para establecer la URL
 export function setApiUrl(newUrl) {
   if (newUrl && newUrl.startsWith('http')) {
-    URL_BASE = newUrl.trim();
-    console.log("API URL configurada:", URL_BASE);
-    localStorage.setItem('apiUrl', URL_BASE);
+    // Asegura que termine con /api/games
+    const cleanUrl = newUrl.replace(/\/+$/, ''); // quita / al final si hay
+    URL_BASE = `${cleanUrl}/api/games`;
+    console.log("URL configurada:", URL_BASE);
+    localStorage.setItem('apiUrl', cleanUrl); // guardamos solo la raíz
   } else {
     console.warn("URL inválida:", newUrl);
   }

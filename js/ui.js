@@ -50,9 +50,10 @@ export async function llamarAPI(url, method, bodyData = null, customHeaders = {}
         method: method,
         headers: {
             'Accept': 'application/json',
-            // Si hay datos en el cuerpo o el método es POST, PUT o PATCH, se añade el Content-Type
-            ...(bodyData || method === 'POST' || method === 'PUT' || method === 'PATCH' ? { 'Content-Type': 'application/json' } : {}),
-            ...customHeaders // Añade cualquier encabezado personalizado.
+            ...(bodyData || method === 'POST' || method === 'PUT' || method === 'PATCH'
+                ? { 'Content-Type': 'application/json' }
+                : {}),
+            ...customHeaders
         },
     };
 
@@ -64,47 +65,75 @@ export async function llamarAPI(url, method, bodyData = null, customHeaders = {}
         displayLog(`Petición: ${method} ${url}...`, 'info');
     }
 
-    try {// Realiza la llamada al API
+    try {
         const response = await fetch(url, config);
 
-        const xMsg = response.headers.get('X-msg'); // mensaje del servidor en el header
+        const xMsg = response.headers.get('X-msg');
 
-        if (response.ok) { // si el estado es 200-299
-            
-            // Si el estado es 204 (No Content) o 200/201 (OK) con Content-Length 0 (ej. HEAD, OPTIONS)
-            const isNoContent = response.status === 204 || response.headers.get('content-length') === '0';
-            
+        // ⛔ EVITAR LECTURA SI ES HEAD
+        if (method === 'HEAD') {
+            return {
+                success: response.ok,
+                status: response.status,
+                data: null // HEAD nunca tiene cuerpo
+            };
+        }
+
+        if (response.ok) {
+
+            const isNoContent =
+                response.status === 204 ||
+                response.headers.get('content-length') === '0' ||
+                response.headers.get('Content-Type') === null;
+
             const data = isNoContent
-                ? { data: "Operación Exitosa" } // No intenta leer el cuerpo JSON
-                : await response.json(); // Solo intenta parsear JSON si hay contenido
-                
-            return { success: true, status: response.status, data: data };
-            
-        } else { // si no fue exitoso (4xx, 5xx)
-            let data = {};
-            let errorMessage = xMsg; // 1. Prioridad: Header X-msg
+                ? { data: "Operación Exitosa" }
+                : await safeJSON(response); // Usemos un lector seguro
 
-            try {// intenta parsear el JSON de error
-                data = await response.json();
-                // 2. Segunda prioridad: msg o message del body
+            return {
+                success: true,
+                status: response.status,
+                data: data
+            };
+
+        } else {
+
+            let data = {};
+            let errorMessage = xMsg;
+
+            try {
+                data = await safeJSON(response);
                 if (!errorMessage) {
                     errorMessage = data.msg || data.message;
                 }
-            } catch (e) { }
+            } catch (e) {}
 
-            // 3. Tercera prioridad: Si sigue vacío, usar un mensaje genérico con el status
             if (!errorMessage || errorMessage.trim() === '') {
                 errorMessage = `Error de la API [Status ${response.status}]`;
             }
-            
-            // muestra el error en un popup
+
             showPopup(errorMessage);
-            
-            return { success: false, status: response.status, error: errorMessage };
+
+            return {
+                success: false,
+                status: response.status,
+                error: errorMessage
+            };
         }
 
-    } catch (error) {// Manejo de errores de red o excepciones
+    } catch (error) {
         showPopup(`Error de red/conexión: ${error.message}`);
-        return { success: false, status: 0, error: `Error de red/conexión: ${error.message}` };
+        return {
+            success: false,
+            status: 0,
+            error: `Error de red/conexión: ${error.message}`
+        };
     }
+}
+
+
+async function safeJSON(response) {
+    const text = await response.text();
+    if (!text) return {};
+    return JSON.parse(text);
 }
