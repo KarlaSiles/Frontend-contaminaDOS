@@ -31,16 +31,25 @@ export const elements = {
 
 // Función para establecer la URL
 export function setApiUrl(newUrl) {
-  if (newUrl && newUrl.startsWith('http')) {
-    // Asegura que termine con /api/games
-    const cleanUrl = newUrl.replace(/\/+$/, ''); // quita / al final si hay
+  // Acepta URLs que comienzan con http:// o https://
+  const regex = /^https?:\/\//i;
+
+  if (newUrl && regex.test(newUrl)) {
+    // Quita cualquier / final
+    const cleanUrl = newUrl.replace(/\/+$/, '');
+
+    // Construye la ruta base
     URL_BASE = `${cleanUrl}/api/games`;
+
     console.log("URL configurada:", URL_BASE);
-    localStorage.setItem('apiUrl', cleanUrl); // guardamos solo la raíz
+
+    // Guarda solo la raíz en localStorage
+    localStorage.setItem('apiUrl', cleanUrl);
   } else {
     console.warn("URL inválida:", newUrl);
   }
 }
+
 
 // Recuperar la URL guardada al cargar el módulo
 const storedUrl = localStorage.getItem('apiUrl');
